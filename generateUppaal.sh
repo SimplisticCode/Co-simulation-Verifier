@@ -1,21 +1,21 @@
 #!/bin/bash
 #Remove foldes
-rm -rf uppall_files_success
-rm -rf uppall_files_mistakes
+rm -rf Uppall-models
 
 
 JARFILE=*.jar
+mkdir Uppall-models
+mkdir Uppall-models/examples
 
-mkdir uppall_files_success
-for f in examples/*.conf
+for f in Scenario/examples/*.conf
 do 
-    OUT=./uppall_files_success/$(basename ${f%.*}).xml
+    OUT=./Uppall-models/examples/$(basename ${f%.*}).xml
     java -jar $JARFILE -m ${f} -o $OUT 
 done
 
-mkdir uppall_files_mistakes
-for f in common_mistakes/*.conf
+mkdir Uppall-models/should_fail
+for f in Scenario/common_mistakes/*.conf
 do 
-    OUT=./uppall_files_mistakes/$(basename ${f%.*}).xml
+    OUT=./Uppall-models/should_fail/$(basename ${f%.*}).xml
     java -jar $JARFILE -m ${f} -o $OUT 
 done
