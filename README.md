@@ -1,7 +1,8 @@
 # Co-simulation-Verifier
+
 This repository shows the scenarios which the co-simulation verifier of the Paper Verification of Co-simulation algorithms has been tested against.
 
-The scenarios are described as several simulation units, the connections and a master algorithm. 
+The scenarios are described as several simulation units, the connections and the master algorithm of the scenario. 
 The scenarios are divided into two folders:
 
 * Examples contains a scenario and a correct master algorithm.
