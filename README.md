@@ -136,7 +136,7 @@ Notice the `until-converged: [msd1.x1, msd1.v1, msd2.fk]` means that the sequenc
 
 ## Generating Uppaal models from a scenario:
 
-The scenarios in these directories are translated to the Uppaal model that can be verified using Uppal by the `scenario_verifier-assembly-*.jar`. [Code and build instructions for the jar](https://github.com/INTO-CPS-Association/Scenario-Verifier).
+The scenarios in these directories are translated to the Uppaal model that can be verified using Uppaal (We have tested it using version 4.1.24) by the `scenario_verifier-assembly-*.jar`. [Code and build instructions for the jar](https://github.com/INTO-CPS-Association/Scenario-Verifier).
 
 The translation of the examples to Uppaal can be performed using the shell script `generateUppaal.sh`.
 This script requires java to be in the path. 
