@@ -3,7 +3,8 @@
 This repository shows the scenarios which the co-simulation verifier of the paper: "Verification of Co-simulation Algorithms" for FormaliSE 2021 has been tested against.
 
 ## The scenarios:
-The scenarios are described as several simulation units, the connections, and the master algorithm. 
+
+The scenarios are described as several simulation units, the connections, and the master algorithm.
 The scenarios are divided into two folders:
 
 * [Examples](https://github.com/SimplisticCode/Co-simulation-Verifier/tree/master/Scenario/examples) contains a scenario and a correct master algorithm.
@@ -52,14 +53,19 @@ The Co-simulation Step procedure is a sequence of operations performed on the FM
 The Co-simulation Step procedure can include the following type of operations:
 
 * Set a value on an FMU input port
+  * Set this set a value obtained at the initial time of the step
+  * Set-tentative this set a value obtained of get-tentative
+
 * Get a value on an FMU output port 
-* Progress an FMU in time either by an implicit, an absolute, or relative step size.
+  * Get this get at the initial time of the step
+  * Get-tentative this get a value obtained after progression of time relative to the initial time.
+* Step - progress an FMU in time either by an implicit, an absolute, or relative step size.
 * Save the state of an FMU
 * Restore the state of an FMU to a previously saved state
 * Loop
 
-
 An example of the Co-simulation Step procedure for the scenario above:
+
 ```
 cosim-step = [
     {step: msd1} # This takes the default step size, which is 3
@@ -78,6 +84,7 @@ The verifier can handle scenarios containing a step finding routine for finding 
 A Step finding routine needs to be encoded in a specific manner to apply the right verification strategy in the Uppaal-model.
 
 An example of a step finding routine for the [scenario](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/Scenario/examples/step_finding_loop_msd_1.conf):
+
 ```
 cosim-step = [
     {save-state: msd1}
@@ -144,7 +151,8 @@ This script requires Java 11 or higher to be in the system environment.
 The Generated Uppaal models can be found in [Uppaal-models](https://github.com/SimplisticCode/Co-simulation-Verifier/tree/master/Uppall-models). This is divided into two different folders `examples` and `should_fail`.
 
 A single scenario can generated using:
-```
+
+```bash
 java -jar scenario_verifier-assembly-*.jar -m ScenarioFile.conf -o OutputUppaalFile.xml
 ```
 
@@ -155,7 +163,8 @@ The Uppaal model can be automatically verified using Uppaal using the shell scri
 To successfully run the verification, the `verifyTA` executable of UPPAAL should be added to the system environment.
 
 A single scenario can generated and verified using:
-```
+
+```bash
 java -jar scenario_verifier-assembly-*.jar -m ScenarioFile.conf -o OutputUppaalFile.xml --verify 
 ```
 
@@ -163,7 +172,8 @@ java -jar scenario_verifier-assembly-*.jar -m ScenarioFile.conf -o OutputUppaalF
 
 App uses log4j2 for logging.
 To run it, set the location of the xml configuration of the logging:
-```
+
+```bash
 java -D"log4j.configurationFile=.\log4j2.xml" -jar .\scenario_verifier-assembly-0.1.jar
 ```
 An example of log4j2.xml is in the source directory.
