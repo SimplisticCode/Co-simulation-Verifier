@@ -156,7 +156,7 @@ To successfully run the verification, the `verifyTA` executable of UPPAAL should
 
 A single scenario can generated and verified using:
 ```
-java -D"log4j.configurationFile=.\log4j2.xml" -jar scenario_verifier-assembly-*.jar -m ScenarioFile.conf -o OutputUppaalFile.xml --verify 
+java -jar scenario_verifier-assembly-*.jar -m ScenarioFile.conf -o OutputUppaalFile.xml --verify 
 ```
 
 ## Running the app with logging:
