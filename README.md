@@ -166,4 +166,4 @@ To run it, set the location of the xml configuration of the logging:
 ```
 java -D"log4j.configurationFile=.\log4j2.xml" -jar .\scenario_verifier-assembly-0.1.jar
 ```
-An example of log4j2.xml in the source directory.
+An example of log4j2.xml is in the source directory.
