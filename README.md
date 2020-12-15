@@ -18,6 +18,13 @@ The scenarios include, among others:
 * Algorithms with an adaptive step size
 * Algorithms with a fixed step size
 
+## Encode a scenario:
+
+A co-simulation sceario should be encode in the conf-format in order for the Verifier to parse and verify it!
+
+
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+
 ## Generating Uppaal models from a scenario:
 
 The scenarios in these directories are translated to the Uppaal model that can be verified using Uppal by the `scenario_verifier-assembly-*.jar`. [Code and build instructions for the jar](https://github.com/INTO-CPS-Association/Scenario-Verifier).
