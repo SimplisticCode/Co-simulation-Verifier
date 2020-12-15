@@ -27,6 +27,22 @@ This script requires java to be in the path.
 
 The Generated Uppaal models can be found in [Uppaal-models](https://github.com/SimplisticCode/Co-simulation-Verifier/tree/master/Uppall-models). This is divided into two different folders `examples` and `should_fail`.
 
+A single scenario can generated using:
+```
+java -jar scenario_verifier-assembly-*.jar -m ScenarioFile.conf -o OutputUppaalFile.xml
+```
+
+## Testing the Uppaal model:
+
+The Uppaal model can be automatically verified using Uppaal using the  the shell script `generate_verify.sh`.
+
+In order to successfully run the verification the `verifyTA` executable of UPPAAL should be added in the system environment.
+
+A single scenario can generated and verified using:
+```
+java -D"log4j.configurationFile=.\log4j2.xml" -jar scenario_verifier-assembly-*.jar -m ScenarioFile.conf -o OutputUppaalFile.xml --verify 
+```
+
 ## Running the app with logging:
 
 App uses log4j2 for logging.
