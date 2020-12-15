@@ -20,10 +20,17 @@ The scenarios include, among others:
 
 ## Encode a scenario:
 
-A co-simulation sceario should be encode in the conf-format in order for the Verifier to parse and verify it!
+A co-simulation sceario should be encoded in the conf-format in order for the Verifier to parse and verify it!
+The scenario include the FMUs and the connections.
 
+An example of the encoding in the conf-format for a scenario:
+![alt text](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/Scenario/Images/scenario-generation.jpg "Scenario and Encoding")
 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+In the scenario an initialization procedure and co-simulation step procedure is also included.
+
+### Initialization Procedure:
+
+### Co-simulation Step Procedure:
 
 ## Generating Uppaal models from a scenario:
 
