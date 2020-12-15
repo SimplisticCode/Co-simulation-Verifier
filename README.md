@@ -1,6 +1,6 @@
 # Co-simulation Algorithm Verifier
 
-This repository shows the scenarios which the co-simulation verifier of the paper: ["Verification of Co-simulation Algorithms"](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/paper.pdf) for FormaliSE 2021 has been tested against.
+This repository shows the scenarios which the co-simulation verifier of the paper: "Verification of Co-simulation Algorithms" for FormaliSE 2021 has been tested against.
 
 ## The scenarios:
 The scenarios are described as several simulation units, the connections, and the master algorithm. 
