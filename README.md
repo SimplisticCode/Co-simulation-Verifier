@@ -23,7 +23,7 @@ The scenarios include, among others:
 A co-simulation scenario should be encoded in the conf-format in order for the Verifier to parse and verify it!
 The scenario includes the FMUs and connections between them.
 
-An example of the encoding in the conf-format for a scenario:
+An example of the encoding in the [conf-format](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/Scenario/examples/simple_master.conf) for a scenario:
 ![alt text](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/Scenario/Images/scenario-generation.jpg "Scenario and Encoding")
 
 In the scenario, an initialization procedure and co-simulation step procedure is also included.
