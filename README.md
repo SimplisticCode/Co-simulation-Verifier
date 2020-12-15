@@ -29,8 +29,46 @@ An example of the encoding in the conf-format for a scenario:
 In the scenario, an initialization procedure and co-simulation step procedure is also included.
 
 ### Initialization Procedure:
+The initialization procedure is a sequence of operations performed on the FMUs in the scenario during the Initialization.
+The initializaiton procedure can include the following type of operations:
 
+* Set a value on an FMU input port
+* Get a value on an FMU output port 
+
+An example of the initialization procedure for the scenario above:
+
+```
+initialization = [
+    {get: msd1.x1}
+    {set: msd2.x1}
+    {get: msd1.v1}
+    {set: msd2.v1}
+    {get: msd2.fk}
+    {set: msd1.fk}
+]
+```
 ### Co-simulation Step Procedure:
+The Co-simulation Step procedure is a sequence of operations performed on the FMUs in the scenario during a co-simulation step.
+The Co-simulation Step procedure can include the following type of operations:
+
+* Set a value on an FMU input port
+* Get a value on an FMU output port 
+* Progress an FMU in time
+
+An example of the Co-simulation Step procedure for the scenario above:
+
+```
+cosim-step = [
+    {step: msd1}
+    {get: msd1.x1}
+    {set: msd2.x1}
+    {get: msd1.v1}
+    {set: msd2.v1}
+    {step: msd2}
+    {get: msd2.fk}
+    {set: msd1.fk}
+]
+```
 
 ## Generating Uppaal models from a scenario:
 
