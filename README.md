@@ -20,13 +20,13 @@ The scenarios include, among others:
 
 ## Encode a scenario:
 
-A co-simulation sceario should be encoded in the conf-format in order for the Verifier to parse and verify it!
-The scenario include the FMUs and the connections.
+A co-simulation scenario should be encoded in the conf-format in order for the Verifier to parse and verify it!
+The scenario includes the FMUs and connections between them.
 
 An example of the encoding in the conf-format for a scenario:
 ![alt text](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/Scenario/Images/scenario-generation.jpg "Scenario and Encoding")
 
-In the scenario an initialization procedure and co-simulation step procedure is also included.
+In the scenario, an initialization procedure and co-simulation step procedure is also included.
 
 ### Initialization Procedure:
 
@@ -48,9 +48,9 @@ java -jar scenario_verifier-assembly-*.jar -m ScenarioFile.conf -o OutputUppaalF
 
 ## Testing the Uppaal model:
 
-The Uppaal model can be automatically verified using Uppaal using the  the shell script `generate_verify.sh`.
+The Uppaal model can be automatically verified using Uppaal using the shell script `generate_verify.sh`.
 
-In order to successfully run the verification the `verifyTA` executable of UPPAAL should be added in the system environment.
+To successfully run the verification, the `verifyTA` executable of UPPAAL should be added to the system environment.
 
 A single scenario can generated and verified using:
 ```
@@ -64,4 +64,4 @@ To run it, set the location of the xml configuration of the logging:
 ```
 java -D"log4j.configurationFile=.\log4j2.xml" -jar .\scenario_verifier-assembly-0.1.jar
 ```
-We have an example of log4j2.xml in the source directory.
+An example of log4j2.xml in the source directory.
