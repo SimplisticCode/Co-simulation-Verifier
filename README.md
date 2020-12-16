@@ -7,8 +7,8 @@ This repository shows the scenarios which the co-simulation verifier of the pape
 The scenarios are described as several simulation units, the connections, and the master algorithm.
 The scenarios are divided into two folders:
 
-* [Examples](https://github.com/SimplisticCode/Co-simulation-Verifier/tree/master/Scenario/examples) contains a scenario and a correct master algorithm.
-* [Common_mistakes](https://github.com/SimplisticCode/Co-simulation-Verifier/tree/master/Scenario/common_mistakes)  contains a scenario and an incorrect master algorithm.
+* [Examples](./Scenario/examples) contains a scenario and a correct master algorithm.
+* [Common_mistakes](./Scenario/common_mistakes)  contains a scenario and an incorrect master algorithm.
 
 A graphical presentation of the different co-simulation scenarios can be found in the [Image-folder](https://github.com/SimplisticCode/Co-simulation-Verifier/tree/master/Scenario/Images).
 
