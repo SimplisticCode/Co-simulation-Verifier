@@ -24,8 +24,8 @@ The scenarios include, among others:
 A co-simulation scenario should be encoded in the conf-format in order for the Verifier to parse and verify it!
 The scenario includes the FMUs and connections between them.
 
-An example of the encoding in the [conf-format](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/Scenario/examples/simple_master.conf) for a scenario:
-![alt text](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/Scenario/Images/scenario-generation.jpg "Scenario and Encoding")
+An example of the encoding in the [conf-format](./Scenario/examples/simple_master.conf) for a scenario:
+![alt text](./Scenario/Images/scenario-generation.jpg "Scenario and Encoding")
 
 In the scenario, an initialization procedure and co-simulation step procedure is also included.
 
@@ -83,7 +83,7 @@ cosim-step = [
 The verifier can handle scenarios containing a step finding routine for finding a common-step between the FMUs.
 A Step finding routine needs to be encoded in a specific manner to apply the right verification strategy in the Uppaal-model.
 
-An example of a step finding routine for the [scenario](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/Scenario/examples/step_finding_loop_msd_1.conf):
+An example of a step finding routine for the [scenario](./Scenario/examples/step_finding_loop_msd_1.conf):
 
 ```
 cosim-step = [
@@ -116,7 +116,7 @@ Notice the `until-step-accept: [msd1, msd2]` means that the sequence of action s
 #### Routine for solving an Algebraic loop:
 The routine for handling algebraic loops in the scenario should also be encoded in special way.
 
-An example of a routine handling the algebraic loop for the [scenario](https://github.com/SimplisticCode/Co-simulation-Verifier/blob/master/Scenario/examples/algebraic_loop_msd_gs.conf):
+An example of a routine handling the algebraic loop for the [scenario](./Scenario/examples/algebraic_loop_msd_gs.conf):
 ```
 {
     loop: {
