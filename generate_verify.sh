@@ -2,7 +2,6 @@
 #Remove foldes
 rm -rf Uppall-models
 
-
 JARFILE=*.jar
 mkdir Uppall-models
 mkdir Uppall-models/examples
@@ -17,5 +16,5 @@ mkdir Uppall-models/should_fail
 for f in Scenario/common_mistakes/*.conf
 do 
     OUT=./Uppall-models/should_fail/$(basename ${f%.*}).xml
-    java -D"log4j.configurationFile=./log4j2.xml" -jar $JARFILE -m ${f} -o $OUT
+    java -D"log4j.configurationFile=./log4j2.xml" -jar $JARFILE -m ${f} -o $OUT --verify  --trace
 done

@@ -22,6 +22,13 @@
         //Active loop - if it is different form -1, we are in the middle of solving an algebraic loop
         int loopActive := -1;
 
+        //Used in Trace Visualization
+        int isInit := 0;
+        int isSimulation := 0;
+
+        bool checksDisabled = false;
+
+
         //In case of a scenario with algebraic loops and step rejection,
         // we need to be able to turn off the precondition checks
         bool shouldChecksBeDisabled(){
@@ -45,12 +52,12 @@
         return false;
         }
 
-        //State of a variable
+        //FMU of a variable
         const int undefined := 0;
         const int defined := 1;
         const int notStable :=-1;
 
-        //State of the variable
+        //FMU of the variable
         typedef struct {
         int[-1,1] status;
         int time;
@@ -153,7 +160,7 @@
         chan fmu[nFMU];
 
         //A channel for all actions - I can use fewer channels and use the actions to distinguish
-        chan actionPerformed;
+        broadcast chan actionPerformed;
 
         //A channel to start the stepFinder
         chan findStepChan;
@@ -175,10 +182,10 @@
         int [-1, H_max] stepsize = 0;
         int [-1, nFMU] relative_step_size = 0;
 
-        int end = END_TIME;
+        const int end = END_TIME;
         int time = START_TIME;
 
-        //Counters to track the current state of the co-simulation
+        //Counters to track the current FMU of the co-simulation
         int fmusUnloaded = 0;
 
         //***********************************************************************************************************
@@ -226,6 +233,8 @@
                     // Nothing to do.
                 }
             }
+            //Update checkStatus
+            checksDisabled = shouldChecksBeDisabled();
         }
 
 
@@ -282,12 +291,12 @@
         variable connectionVariable[nFMU][MaxNOutputs][2] = { {{{undefined,0}, {undefined,0}},{{undefined,0}, {undefined,0}},{{undefined,0}, {undefined,0}}},{{{undefined,0}, {undefined,0}},{{undefined,0}, {undefined,0}},{{undefined,0}, {undefined,0}}} };
 
         //Connections - do not longer contain the type of the input - but it is still a 1:1 mapping
-        ExternalConnection external[nExternal] = { {msd1, msd1_x1, msd2, msd2_x1},{msd1, msd1_v1, msd2, msd2_v1},{msd1, msd1_z, msd2, msd2_z},{msd2, msd2_fk, msd1, msd1_fk} };
+        const ExternalConnection external[nExternal] = { {msd1, msd1_x1, msd2, msd2_x1},{msd1, msd1_v1, msd2, msd2_v1},{msd1, msd1_z, msd2, msd2_z},{msd2, msd2_fk, msd1, msd1_fk} };
 
-        InternalConnection feedthroughInStep[nInternal] = { {msd2, msd2_x1, msd2_fk},{msd2, msd2_v1, msd2_fk} };
+        const InternalConnection feedthroughInStep[nInternal] = { {msd2, msd2_x1, msd2_fk},{msd2, msd2_v1, msd2_fk} };
 
         //The initial internal connection could be different from the connection in the simulation and should be represented differently
-        InternalConnection feedthroughInInit[nInternalInit] = { {msd2, msd2_x1, msd2_fk},{msd2, msd2_v1, msd2_fk} };
+        const InternalConnection feedthroughInInit[nInternalInit] = { {msd2, msd2_x1, msd2_fk},{msd2, msd2_v1, msd2_fk} };
 
         //The array show if an FMU can reject a step or not - if the FMU can reject a step the value is 1 on the index defined by the fmus
         const bool mayRejectStep[nFMU] = { false,false };
@@ -298,7 +307,6 @@
         const int nStepOperations := 12;
         const int nTerminationOperations := 6;
 
-        //TODO: This
         // Numbers for algebraic loop operations in init
         const int maxNAlgebraicLoopOperationsInInit := 1;
         const int maxNConvergeOperationsForAlgebraicLoopsInInit := 1;
@@ -323,11 +331,11 @@
         const int[0,maxNRetryOperationsForAlgebraicLoopsInStep] nRetryOperationsPerAlgebraicLoopInStep[nAlgebraicLoopsInStep] = {0};
 
         //These operations define what should be performed in the simulation - it is assumed that the operation first loads the fmus
-        Operation instantiationOperations[nInstantiationOperations] = { {msd1, instantiate, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, instantiate, noPort, noStep, noFMU, noCommitment, noLoop},{msd1, setupExperiment, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, setupExperiment, noPort, noStep, noFMU, noCommitment, noLoop} };
+        const Operation instantiationOperations[nInstantiationOperations] = { {msd1, instantiate, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, instantiate, noPort, noStep, noFMU, noCommitment, noLoop},{msd1, setupExperiment, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, setupExperiment, noPort, noStep, noFMU, noCommitment, noLoop} };
 
-        Operation initializationOperations[nInitializationOperations] = { {msd1, enterInitialization, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, enterInitialization, noPort, noStep, noFMU, noCommitment, noLoop},{msd1, get, msd1_x1, noStep, noFMU, final, noLoop},{msd2, set, msd2_x1, noStep, noFMU, final, noLoop},{msd1, get, msd1_v1, noStep, noFMU, final, noLoop},{msd2, set, msd2_v1, noStep, noFMU, final, noLoop},{msd2, get, msd2_fk, noStep, noFMU, final, noLoop},{msd1, set, msd1_fk, noStep, noFMU, final, noLoop},{msd1, get, msd1_z, noStep, noFMU, final, noLoop},{msd2, set, msd2_z, noStep, noFMU, final, noLoop},{msd1, exitInitialization, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, exitInitialization, noPort, noStep, noFMU, noCommitment, noLoop} };
+        const Operation initializationOperations[nInitializationOperations] = { {msd1, enterInitialization, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, enterInitialization, noPort, noStep, noFMU, noCommitment, noLoop},{msd1, get, msd1_x1, noStep, noFMU, final, noLoop},{msd2, set, msd2_x1, noStep, noFMU, final, noLoop},{msd1, get, msd1_v1, noStep, noFMU, final, noLoop},{msd2, set, msd2_v1, noStep, noFMU, final, noLoop},{msd2, get, msd2_fk, noStep, noFMU, final, noLoop},{msd1, set, msd1_fk, noStep, noFMU, final, noLoop},{msd1, get, msd1_z, noStep, noFMU, final, noLoop},{msd2, set, msd2_z, noStep, noFMU, final, noLoop},{msd1, exitInitialization, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, exitInitialization, noPort, noStep, noFMU, noCommitment, noLoop} };
 
-        Operation stepOperations[nStepOperations] = { {msd1, save, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, save, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, set, msd2_x1, noStep, noFMU, final, noLoop},{msd2, set, msd2_v1, noStep, noFMU, final, noLoop},{msd2, step, noPort, H, noFMU, noCommitment, noLoop},{msd2, get, msd2_fk, noStep, noFMU, final, noLoop},{msd1, set, msd1_fk, noStep, noFMU, final, noLoop},{msd1, step, noPort, H, noFMU, noCommitment, noLoop},{msd1, get, msd1_x1, noStep, noFMU, final, noLoop},{msd1, get, msd1_v1, noStep, noFMU, final, noLoop},{msd1, get, msd1_z, noStep, noFMU, final, noLoop},{msd2, set, msd2_z, noStep, noFMU, final, noLoop} };
+        const Operation stepOperations[nStepOperations] = { {msd1, save, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, save, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, set, msd2_x1, noStep, noFMU, final, noLoop},{msd2, set, msd2_v1, noStep, noFMU, final, noLoop},{msd2, step, noPort, H, noFMU, noCommitment, noLoop},{msd2, get, msd2_fk, noStep, noFMU, final, noLoop},{msd1, set, msd1_fk, noStep, noFMU, final, noLoop},{msd1, step, noPort, H, noFMU, noCommitment, noLoop},{msd1, get, msd1_x1, noStep, noFMU, final, noLoop},{msd1, get, msd1_v1, noStep, noFMU, final, noLoop},{msd1, get, msd1_z, noStep, noFMU, final, noLoop},{msd2, set, msd2_z, noStep, noFMU, final, noLoop} };
 
         //These are the operations to be performed in order to find the correct step
         //In these operation there is a difference on the third parameter to doStep:
@@ -335,22 +343,22 @@
         // A stepSize (0:(nFMU-1)) means that the should look at that index in stepVariables use that as the step
         //This is being done inside - findStepAction
 
-        Operation findStepIteration[nFindStepOperations] = { {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} };
-        Operation StepFix[nRestore] = { {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} };
+        const Operation findStepIteration[nFindStepOperations] = { {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} };
+        const Operation StepFix[nRestore] = { {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} };
 
         //Possible multiple loops
         //Loop operations are to solve algebraic loops in the co-simulation scenario
-        Operation operationsPerAlgebraicLoopInStep[nAlgebraicLoopsInStep][maxNAlgebraicLoopOperationsInStep] = {{ {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} } };
-        Operation operationsPerAlgebraicLoopInInit[nAlgebraicLoopsInInit][maxNAlgebraicLoopOperationsInInit] = {{ {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} } };
+        const Operation operationsPerAlgebraicLoopInStep[nAlgebraicLoopsInStep][maxNAlgebraicLoopOperationsInStep] = {{ {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} } };
+        const Operation operationsPerAlgebraicLoopInInit[nAlgebraicLoopsInInit][maxNAlgebraicLoopOperationsInInit] = {{ {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} } };
 
-        //The converge ports is too mark which variables that needs too be checked in the convergence loop
+        //The converge ports is to mark which variables that needs to be checked in the convergence loop
         //The convention is now to specify the FMU first and the port to denote the variables that should be checked
-        FmuOutputPort convergencePortsPerAlgebraicLoopInStep[nAlgebraicLoopsInStep][maxNConvergeOperationsForAlgebraicLoopsInStep] = {{ { noFMU, noPort} } };
-        FmuOutputPort convergencePortsPerAlgebraicLoopInInit[nAlgebraicLoopsInInit][maxNConvergeOperationsForAlgebraicLoopsInInit] = {{ { noFMU, noPort} } };
+        const FmuOutputPort convergencePortsPerAlgebraicLoopInStep[nAlgebraicLoopsInStep][maxNConvergeOperationsForAlgebraicLoopsInStep] = {{ { noFMU, noPort} } };
+        const FmuOutputPort convergencePortsPerAlgebraicLoopInInit[nAlgebraicLoopsInInit][maxNConvergeOperationsForAlgebraicLoopsInInit] = {{ { noFMU, noPort} } };
 
-        Operation retryOperationsPerAlgebraicLoopInStep[nAlgebraicLoopsInStep][maxNRetryOperationsForAlgebraicLoopsInStep] = {{ {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} } };
+        const Operation retryOperationsPerAlgebraicLoopInStep[nAlgebraicLoopsInStep][maxNRetryOperationsForAlgebraicLoopsInStep] = {{ {noFMU, noOp, noPort, noStep, noFMU, noCommitment, noLoop} } };
 
-        Operation terminationOperations[nTerminationOperations] = { {msd1, terminate, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, terminate, noPort, noStep, noFMU, noCommitment, noLoop},{msd1, freeInstance, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, freeInstance, noPort, noStep, noFMU, noCommitment, noLoop},{msd1, unload, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, unload, noPort, noStep, noFMU, noCommitment, noLoop} };
+        const Operation terminationOperations[nTerminationOperations] = { {msd1, terminate, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, terminate, noPort, noStep, noFMU, noCommitment, noLoop},{msd1, freeInstance, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, freeInstance, noPort, noStep, noFMU, noCommitment, noLoop},{msd1, unload, noPort, noStep, noFMU, noCommitment, noLoop},{msd2, unload, noPort, noStep, noFMU, noCommitment, noLoop} };
 
     </declaration>
     <template>
@@ -500,7 +508,7 @@
             <label kind="guard" x="1079" y="34">cosimstep_pc == nStepOperations + 1
                 &amp;&amp; time &lt; end
             </label>
-            <label kind="assignment" x="1470" y="17">takeStep(global_h)</label>
+            <label kind="assignment" x="1470" y="17">takeStep(global_h), isSimulation= 0</label>
             <nail x="1351" y="34"/>
         </transition>
         <transition>
@@ -508,6 +516,7 @@
             <target ref="id8"/>
             <label kind="guard" x="859" y="-136">init_pc == nInitializationOperations</label>
             <label kind="synchronisation" x="859" y="-119">actionPerformed?</label>
+            <label kind="assignment" x="858" y="-85">isInit = 0</label>
         </transition>
         <transition>
             <source ref="id9"/>
@@ -531,7 +540,7 @@
         <transition>
             <source ref="id20"/>
             <target ref="id19"/>
-            <label kind="assignment" x="357" y="-102">selectNextInitAction()</label>
+            <label kind="assignment" x="357" y="-102">selectNextInitAction(), isInit = 1</label>
         </transition>
         <transition>
             <source ref="id22"/>
@@ -585,7 +594,7 @@
         <transition>
             <source ref="id13"/>
             <target ref="id18"/>
-            <label kind="assignment" x="1428" y="-144">selectNextCosimStepAction()</label>
+            <label kind="assignment" x="1428" y="-144">selectNextCosimStepAction(), isSimulation = 1</label>
             <nail x="1521" y="-102"/>
         </transition>
         <transition>
@@ -641,7 +650,7 @@
             <label kind="guard" x="1436" y="102">cosimstep_pc == nStepOperations + 1
                 &amp;&amp; time &gt;= end
             </label>
-            <label kind="assignment" x="1436" y="161">findFMUTerminateAction()</label>
+            <label kind="assignment" x="1436" y="161">findFMUTerminateAction(), isSimulation = 0</label>
             <nail x="1683" y="272"/>
         </transition>
         <transition>
@@ -670,7 +679,7 @@
     </template>
     <template>
         <name>LoopSolverInit</name>
-        <parameter>int maxIteration</parameter>
+        <parameter>const int maxIteration</parameter>
         <declaration>
             int convergence_pc := 0;
 
@@ -837,7 +846,7 @@
     </template>
     <template>
         <name>LoopSolver</name>
-        <parameter>int maxIteration</parameter>
+        <parameter>const int maxIteration</parameter>
         <declaration>
             int convergence_pc := 0;
             int restore_pc := 0;
@@ -926,7 +935,7 @@
         <location id="id19" x="-17" y="-518">
         </location>
         <location id="id20" x="-340" y="-518">
-            <name x="-332" y="-509">RestoreState</name>
+            <name x="-332" y="-509">Restore</name>
             <committed/>
         </location>
         <location id="id21" x="-739" y="-518">
@@ -1063,7 +1072,7 @@
     </template>
     <template>
         <name>StepFinder</name>
-        <parameter>int maxTries</parameter>
+        <parameter>const int maxTries</parameter>
         <declaration>
             int step_pc := 0;
             int restore_pc := 0;
@@ -1235,7 +1244,7 @@
             <label kind="guard" x="416" y="-221">!loopConverged() &amp;&amp;
                 numbersOfTries &lt; maxTries
             </label>
-            <label kind="assignment" x="433" y="-161">activeFMU := 0,
+            <label kind="assignment" x="433" y="-161">selectNextStepRestoreAction(),
                 updateIsExtra()
             </label>
         </transition>
@@ -1252,27 +1261,27 @@
     </template>
     <template>
         <name>FMU</name>
-        <parameter>int id, int nOutput, int nInput, int inputType[MaxNInputs]</parameter>
+        <parameter>const int id, const int nOutput, const int nInput, const int inputType[MaxNInputs]</parameter>
         <declaration>
             int cTime := START_TIME;
             variable inputVariables[MaxNInputs] = { {defined,0},{defined,0},{defined,0} };
             variable outputVariables[MaxNOutputs] = { {defined,0},{defined,0},{defined,0} };
-            bool initialized := false;
-            bool simulated := false;
 
             //Index for the for-loop
             int i := 0;
 
-            //Backup state
+            //Backup FMU
             variable savedOutputVariables[MaxNOutputs];
             variable savedInputVariables[MaxNInputs];
             int savedTime;
             bool isSaved := false;
-
             bool isConsistent := true;
 
+            int stepEnabled := false;
+            bool getEnabled[MaxNOutputs] := { false,false,false };
+            bool setEnabled[MaxNInputs] := { false,false,false };
+
             void initialize(){
-                initialized := true;
                 //Set all variables to undefined
                 for(i = 0; i &lt; nInput; i++){
                     inputVariables[i].status := undefined;
@@ -1282,10 +1291,6 @@
                     outputVariables[i].status := undefined;
                     outputVariables[i].time := 0;
                 }
-            }
-
-            void simulate(){
-                simulated := true;
             }
 
             void getValue(int v, int a){
@@ -1342,13 +1347,13 @@
                 stepVariables[id] := t;
             }
 
-            void restoreState(){
+            void restoreFMU(){
                 outputVariables := savedOutputVariables;
                 inputVariables := savedInputVariables;
                 cTime := savedTime;
             }
 
-            void saveState(){
+            void saveFMU(){
                 savedOutputVariables := outputVariables;
                 savedInputVariables := inputVariables;
                 savedTime := cTime;
@@ -1356,7 +1361,7 @@
             }
 
             bool preSetInit(int v, int a){
-                if(shouldChecksBeDisabled()){
+                if(checksDisabled){
                     return true;
                 }
                 //All outputs connected to the input should be defined - no difference between delay and reactive in init. ConnectionVariables an d ExternalConnections are having the same order
@@ -1365,8 +1370,8 @@
 
             }
 
-            bool preGetInit(int v, int a){
-                if(shouldChecksBeDisabled()){
+            bool preGetInit(int v){
+                if(checksDisabled){
                     return true;
                 }
                 //The internal time should be equivalent to 0 and all variable connected to this one should be defined
@@ -1376,7 +1381,7 @@
 
 
             bool preSet(int v, int a){
-                if(shouldChecksBeDisabled()){
+                if(checksDisabled){
                     return true;
                 }
 
@@ -1391,7 +1396,7 @@
 
 
             bool preGet(int v){
-                if(shouldChecksBeDisabled()){
+                if(checksDisabled){
                     return true;
                 }
 
@@ -1401,7 +1406,7 @@
             }
 
             bool preDoStep(int t){
-                if(shouldChecksBeDisabled()){
+                if(checksDisabled){
                     return true;
                 }
 
@@ -1418,15 +1423,38 @@
                 inputVariables[x].time == 0));
             }
 
-            bool preSaveState(){
+            bool preSaveFMU(){
                 //Always possible
                 return true;
             }
 
-            bool preRestoreState(){
-                //Should a requirement be a saved previous state?
+            bool preRestoreFMU(){
+                //Should a requirement be a saved previous FMU?
                 return isSaved;
             }
+
+            void updateEnableActions(bool isInit){
+                if(isInit){
+                    for(i = 0; i &lt; nInput; i++){
+                        setEnabled[i] := preSetInit(i, final) &amp;&amp;
+                            inputVariables[i].status == undefined;
+                    }
+                    for(i := 0; i &lt; nOutput; i++){
+                        getEnabled[i] := preGetInit(i) &amp;&amp;
+                            outputVariables[i].status == undefined;
+                    }
+                stepEnabled := false;
+            }else{
+                    for(i = 0; i &lt; nInput; i++){
+                        setEnabled[i] := preSet(i, final);
+                    }
+                    for(i := 0; i &lt; nOutput; i++){
+                        getEnabled[i] := preGet(i);
+                    }
+                    stepEnabled := preDoStep(h);
+                }
+            }
+
         </declaration>
         <location id="id37" x="-9588" y="-11305">
             <name x="-9598" y="-11339">Unloaded</name>
@@ -1457,11 +1485,11 @@
             <name x="-12204" y="-11543">Instantiated</name>
         </location>
         <location id="id47" x="-10574" y="-11152">
-            <label kind="invariant" x="-10584" y="-11135">preRestoreState()</label>
+            <label kind="invariant" x="-10584" y="-11135">preRestoreFMU()</label>
             <committed/>
         </location>
         <location id="id48" x="-11058" y="-11186">
-            <label kind="invariant" x="-11101" y="-11169">preGetInit(var, commitment)</label>
+            <label kind="invariant" x="-11101" y="-11169">preGetInit(var)</label>
             <committed/>
         </location>
         <location id="id49" x="-11058" y="-11432">
@@ -1472,7 +1500,7 @@
             <name x="-12484" y="-11279">loaded</name>
         </location>
         <location id="id51" x="-10293" y="-11101">
-            <label kind="invariant" x="-10250" y="-11109">preSaveState()</label>
+            <label kind="invariant" x="-10250" y="-11109">preSaveFMU()</label>
             <committed/>
         </location>
         <location id="id52" x="-10192" y="-11500">
@@ -1503,6 +1531,14 @@
             <label kind="synchronisation" x="-9808" y="-11322">fmu[id]?</label>
         </transition>
         <transition>
+            <source ref="id54"/>
+            <target ref="id54"/>
+            <label kind="synchronisation" x="-10965" y="-11203">actionPerformed?</label>
+            <label kind="assignment" x="-10990" y="-11169">updateEnableActions(true)</label>
+            <nail x="-10914" y="-11237"/>
+            <nail x="-11016" y="-11177"/>
+        </transition>
+        <transition>
             <source ref="id56"/>
             <target ref="id38"/>
             <label kind="guard" x="-10030" y="-11339">action == freeInstance</label>
@@ -1512,18 +1548,19 @@
             <source ref="id41"/>
             <target ref="id57"/>
             <label kind="synchronisation" x="-10693" y="-11322">actionPerformed!</label>
+            <label kind="assignment" x="-10693" y="-11322">updateEnableActions(false)</label>
         </transition>
         <transition>
             <source ref="id54"/>
             <target ref="id41"/>
             <label kind="guard" x="-10965" y="-11348">action == exitInitialization</label>
             <label kind="synchronisation" x="-10939" y="-11331">fmu[id]?</label>
-            <label kind="assignment" x="-10931" y="-11288">simulate()</label>
         </transition>
         <transition>
             <source ref="id42"/>
             <target ref="id54"/>
             <label kind="synchronisation" x="-11287" y="-11330">actionPerformed!</label>
+            <label kind="assignment" x="-11287" y="-11330">updateEnableActions(true), initialize()</label>
         </transition>
         <transition>
             <source ref="id45"/>
@@ -1578,13 +1615,14 @@
             <target ref="id44"/>
             <label kind="guard" x="-12400" y="-11339">action == instantiate</label>
             <label kind="synchronisation" x="-12382" y="-11305">fmu[id]?</label>
-            <label kind="assignment" x="-12382" y="-11288">initialize()</label>
+            <label kind="assignment" x="-12382" y="-11288">
+                </label>
         </transition>
         <transition>
             <source ref="id47"/>
             <target ref="id57"/>
             <label kind="synchronisation" x="-10616" y="-11237">actionPerformed!</label>
-            <label kind="assignment" x="-10582" y="-11262">restoreState()</label>
+            <label kind="assignment" x="-10582" y="-11262">restoreFMU(), updateEnableActions(false)</label>
         </transition>
         <transition>
             <source ref="id57"/>
@@ -1594,10 +1632,18 @@
             <nail x="-10395" y="-11092"/>
         </transition>
         <transition>
+            <source ref="id57"/>
+            <target ref="id57"/>
+            <label kind="synchronisation" x="-10608" y="-11186">actionPerformed?</label>
+            <label kind="assignment" x="-10642" y="-11143">updateEnableActions(false)</label>
+            <nail x="-10446" y="-11118"/>
+            <nail x="-10540" y="-11211"/>
+        </transition>
+        <transition>
             <source ref="id48"/>
             <target ref="id54"/>
             <label kind="synchronisation" x="-11228" y="-11237">actionPerformed!</label>
-            <label kind="assignment" x="-11245" y="-11211">getValue(var, commitment)</label>
+            <label kind="assignment" x="-11245" y="-11211">getValue(var, commitment), updateEnableActions(true)</label>
             <nail x="-11118" y="-11245"/>
         </transition>
         <transition>
@@ -1611,7 +1657,7 @@
             <source ref="id49"/>
             <target ref="id54"/>
             <label kind="synchronisation" x="-11024" y="-11432">actionPerformed!</label>
-            <label kind="assignment" x="-11016" y="-11407">setValue(var, commitment)</label>
+            <label kind="assignment" x="-11016" y="-11407">setValue(var, commitment), updateEnableActions(true)</label>
             <nail x="-10999" y="-11373"/>
         </transition>
         <transition>
@@ -1625,21 +1671,21 @@
             <source ref="id51"/>
             <target ref="id57"/>
             <label kind="synchronisation" x="-10191" y="-11152">actionPerformed!</label>
-            <label kind="assignment" x="-10183" y="-11186">saveState()</label>
+            <label kind="assignment" x="-10183" y="-11186">saveFMU(), updateEnableActions(false)</label>
             <nail x="-10191" y="-11160"/>
         </transition>
         <transition>
             <source ref="id52"/>
             <target ref="id57"/>
             <label kind="synchronisation" x="-10158" y="-11466">actionPerformed!</label>
-            <label kind="assignment" x="-10149" y="-11415">doStep(stepsize)</label>
+            <label kind="assignment" x="-10149" y="-11415">doStep(stepsize), updateEnableActions(false)</label>
             <nail x="-10132" y="-11373"/>
         </transition>
         <transition>
             <source ref="id53"/>
             <target ref="id57"/>
             <label kind="synchronisation" x="-10294" y="-11551">actionPerformed!</label>
-            <label kind="assignment" x="-10362" y="-11483">getValue(var, commitment)</label>
+            <label kind="assignment" x="-10362" y="-11483">getValue(var, commitment), updateEnableActions(false)</label>
             <nail x="-10226" y="-11517"/>
         </transition>
         <transition>
@@ -1664,7 +1710,7 @@
             <source ref="id55"/>
             <target ref="id57"/>
             <label kind="synchronisation" x="-10531" y="-11509">actionPerformed!</label>
-            <label kind="assignment" x="-10481" y="-11534">setValue(var, commitment)</label>
+            <label kind="assignment" x="-10481" y="-11534">setValue(var, commitment), updateEnableActions(false)</label>
             <nail x="-10387" y="-11492"/>
         </transition>
         <transition>
